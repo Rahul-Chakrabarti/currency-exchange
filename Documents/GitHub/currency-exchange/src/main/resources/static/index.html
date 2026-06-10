@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Currency Exchange Analyzer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0f1117;
+    --surface:  #1a1d27;
+    --border:   #2a2d3a;
+    --accent:   #6366f1;
+    --accent2:  #22d3ee;
+    --green:    #22c55e;
+    --red:      #ef4444;
+    --amber:    #f59e0b;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --radius:   12px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  /* ── Header ── */
+  header {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--accent); }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+  .live-badge {
+    font-size: 11px;
+    color: var(--green);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Main layout ── */
+  .container { max-width: 900px; margin: 0 auto; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* ── Controls ── */
+  .controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  input, select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  input { width: 120px; }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-secondary { background: var(--border); color: var(--text); }
+  .btn-accent2 { background: var(--accent2); color: var(--bg); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── Rate display ── */
+  .rate-big {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    line-height: 1;
+  }
+  .rate-pair {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .rate-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .stat-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-value { font-size: 18px; font-weight: 600; }
+
+  /* ── Recommendation badge ── */
+  .rec-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+  .rec-buy  { background: rgba(34,197,94,0.15);  color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .rec-wait { background: rgba(239,68,68,0.15);  color: var(--red);   border: 1px solid rgba(239,68,68,0.3); }
+  .rec-hold { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+
+  /* ── Confidence bar ── */
+  .confidence-wrap { margin: 16px 0; }
+  .confidence-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .confidence-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 999px;
+    transition: width 0.8s ease;
+  }
+
+  /* ── Forecast chart ── */
+  .chart-wrap {
+    margin-top: 16px;
+    position: relative;
+    height: 160px;
+  }
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 120px;
+  }
+  .chart-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .chart-bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, var(--accent), rgba(99,102,241,0.4));
+    transition: height 0.6s ease;
+    min-height: 4px;
+  }
+  .chart-date {
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .chart-val {
+    font-size: 9px;
+    color: var(--accent2);
+    text-align: center;
+  }
+
+  /* ── Model cards ── */
+  .model-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .model-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .model-name { font-size: 11px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .model-vote { font-size: 20px; font-weight: 700; }
+  .up   { color: var(--green); }
+  .down { color: var(--red); }
+
+  /* ── Reasoning ── */
+  .reasoning {
+    background: var(--bg);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    margin-top: 16px;
+  }
+
+  /* ── Loading / error states ── */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    padding: 14px;
+    color: var(--red);
+    font-size: 13px;
+  }
+  .hidden { display: none; }
+
+  @media (max-width: 600px) {
+    .model-grid { grid-template-columns: 1fr; }
+    .rate-big { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Currency<span>X</span></div>
+  <div class="live-badge"><span class="status-dot"></span>LIVE</div>
+</header>
+
+<div class="container">
+
+  <!-- Controls -->
+  <div class="card">
+    <div class="card-title">Currency Pair</div>
+    <div class="controls">
+      <div class="field">
+        <label>From</label>
+        <input id="fromCurrency" value="CAD" maxlength="3"
+               oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="field">
+        <label>To</label>
+        <input id="toCurrency" value="INR" maxlength="3"
+               oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" onclick="loadRate()">Get Rate</button>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="btn btn-accent2" id="forecastBtn" onclick="loadForecast()">
+          Run ML Forecast
+        </button>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="btn btn-secondary" onclick="refreshRates()">Refresh Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current Rate -->
+  <div class="card" id="rateCard">
+    <div class="card-title">Current Rate</div>
+    <div id="rateContent" class="loading">
+      <div class="spinner"></div>
+      Enter a currency pair and click Get Rate
+    </div>
+  </div>
+
+  <!-- ML Forecast -->
+  <div class="card hidden" id="forecastCard">
+    <div class="card-title">ML Forecast — BUY / WAIT / HOLD</div>
+    <div id="forecastContent" class="loading hidden"></div>
+  </div>
+
+</div>
+
+<script>
+  const API = '';  // same origin — Spring Boot serves both this page and the API
+
+  // ── Fetch current rate ────────────────────────────────────────────────────
+  async function loadRate(retryAfterRefresh = true) {
+    const from = document.getElementById('fromCurrency').value.trim();
+    const to   = document.getElementById('toCurrency').value.trim();
+    if (!from || !to || from.length !== 3 || to.length !== 3) {
+      showRateError('Please enter valid 3-letter currency codes (e.g. CAD, INR)');
+      return;
+    }
+
+    showRateLoading();
+
+    try {
+      const res  = await fetch(`${API}/api/rates/latest/pair?from=${from}&to=${to}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (retryAfterRefresh) {
+          await fetch(`${API}/api/rates/refresh?base=${from}`, { method: 'POST' });
+          return loadRate(false);
+        }
+        showRateError(data.message || 'Failed to fetch rate. Try clicking Refresh Data first.');
+        return;
+      }
+
+      renderRate(data);
+    } catch (e) {
+      showRateError('Cannot connect to the server. Make sure the app is running.');
+    }
+  }
+
+  function renderRate(data) {
+    document.getElementById('rateContent').innerHTML = `
+      <div class="rate-big">${parseFloat(data.rate).toFixed(4)}</div>
+      <div class="rate-pair">1 ${data.from} = ${parseFloat(data.rate).toFixed(4)} ${data.to}</div>
+      <div class="rate-grid">
+        <div class="stat-box">
+          <div class="stat-label">Base</div>
+          <div class="stat-value">${data.from}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Target</div>
+          <div class="stat-value">${data.to}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Rate</div>
+          <div class="stat-value">${parseFloat(data.rate).toFixed(6)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Run ML Forecast ───────────────────────────────────────────────────────
+  async function loadForecast() {
+    const from = document.getElementById('fromCurrency').value.trim();
+    const to   = document.getElementById('toCurrency').value.trim();
+    if (!from || !to) { loadRate(); return; }
+
+    const btn = document.getElementById('forecastBtn');
+    btn.disabled = true;
+    btn.textContent = 'Running Models...';
+
+    const card    = document.getElementById('forecastCard');
+    const content = document.getElementById('forecastContent');
+    card.classList.remove('hidden');
+    content.classList.remove('hidden');
+    content.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        Training ML models on 1 year of historical data...<br>
+        <small style="color:var(--muted);margin-top:8px;display:block">
+          This takes ~5 seconds. Linear Regression, ARIMA, and Random Forest are running.
+        </small>
+      </div>`;
+
+    try {
+      const res  = await fetch(`${API}/api/forecast?from=${from}&to=${to}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        content.innerHTML = `<div class="error">${data.message || 'Forecast failed.'}</div>`;
+        return;
+      }
+
+      renderForecast(data);
+    } catch (e) {
+      content.innerHTML = `<div class="error">Cannot connect to the server.</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Run ML Forecast';
+    }
+  }
+
+  function renderForecast(data) {
+    const recClass = {
+      'BUY NOW': 'rec-buy',
+      'WAIT':    'rec-wait',
+      'HOLD':    'rec-hold'
+    }[data.recommendation] || 'rec-hold';
+
+    const models = data.models || {};
+    const lr = models.linearRegression || {};
+    const rf = models.randomForest || {};
+    const ar = models.arima || {};
+
+    // Build the 7-day bar chart
+    const points = data.sevenDayForecast || [];
+    const rates  = points.map(p => parseFloat(p.predicted_rate));
+    const minR   = Math.min(...rates) * 0.9998;
+    const maxR   = Math.max(...rates) * 1.0002;
+    const range  = maxR - minR || 1;
+
+    const bars = points.map(p => {
+      const r      = parseFloat(p.predicted_rate);
+      const height = Math.max(((r - minR) / range) * 100, 8);
+      const date   = p.date.slice(5); // MM-DD
+      return `
+        <div class="chart-bar-wrap">
+          <div class="chart-val">${r.toFixed(2)}</div>
+          <div class="chart-bar" style="height:${height}%"></div>
+          <div class="chart-date">${date}</div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('forecastContent').innerHTML = `
+      <div class="rec-badge ${recClass}">${data.recommendation}</div>
+      <div style="font-size:13px;color:var(--muted)">
+        Generated at ${data.generatedAt} &nbsp;·&nbsp;
+        Current rate: <strong style="color:var(--text)">${data.currentRate}</strong>
+        ${data.baseCurrency}/${data.targetCurrency}
+      </div>
+
+      <div class="confidence-wrap">
+        <div class="confidence-label">Model Confidence: ${data.confidence}%</div>
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width:${data.confidence}%"></div>
+        </div>
+      </div>
+
+      <div class="reasoning">${data.reasoning}</div>
+
+      <div style="margin-top:24px">
+        <div class="card-title">7-Day Rate Forecast (ARIMA)</div>
+        <div class="chart-bars">${bars}</div>
+      </div>
+
+      <div class="model-grid">
+        <div class="model-card">
+          <div class="model-name">Linear Regression</div>
+          <div class="model-vote ${lr.trend === 'UP' ? 'up' : 'down'}">
+            ${lr.trend === 'UP' ? '↑' : '↓'} ${lr.trend}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">
+            Tomorrow: ${lr.tomorrowPrediction}
+          </div>
+        </div>
+        <div class="model-card">
+          <div class="model-name">Random Forest</div>
+          <div class="model-vote ${rf.vote === 'UP' ? 'up' : 'down'}">
+            ${rf.vote === 'UP' ? '↑' : '↓'} ${rf.vote}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">
+            ${rf.probabilityUp}% chance up · ${rf.probabilityDown}% down
+          </div>
+        </div>
+        <div class="model-card">
+          <div class="model-name">ARIMA</div>
+          <div class="model-vote ${ar.sevenDayTrend === 'UP' ? 'up' : 'down'}">
+            ${ar.sevenDayTrend === 'UP' ? '↑' : '↓'} ${ar.sevenDayTrend}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">
+            7-day target: ${ar.projectedRate}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Refresh rates ─────────────────────────────────────────────────────────
+  async function refreshRates() {
+    const from = document.getElementById('fromCurrency').value.trim() || 'USD';
+    try {
+      await fetch(`${API}/api/rates/refresh?base=${from}`, { method: 'POST' });
+      await fetch(`${API}/api/rates/refresh?base=USD`, { method: 'POST' });
+      loadRate();
+    } catch(e) {
+      showRateError('Refresh failed. Is the app running?');
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function showRateLoading() {
+    document.getElementById('rateContent').innerHTML =
+      '<div class="loading"><div class="spinner"></div>Fetching live rate...</div>';
+  }
+
+  function showRateError(msg) {
+    document.getElementById('rateContent').innerHTML =
+      `<div class="error">${msg}</div>`;
+  }
+
+  // Load the default CAD/INR pair and its ML forecast on page open
+  window.onload = async () => {
+    await loadRate();
+    await loadForecast();
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: currency-db
+    environment:
+      POSTGRES_DB:       currency_exchange_db
+      POSTGRES_USER:     postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: currency-app
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL:                    jdbc:postgresql://postgres:5432/currency_exchange_db
+      DB_USERNAME:               postgres
+      DB_PASSWORD:               postgres
+      EXCHANGE_API_URL:          https://open.er-api.com/v6/latest
+      EXCHANGE_API_DEFAULT_BASE: CAD
+      EXPORT_DIR:                /app/data/exports
+      REFRESH_CRON:              "0 0 */6 * * *"
+    volumes:
+      - exports_data:/app/data/exports
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  db_data:
+  exports_data:

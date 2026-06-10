@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ── Parent ─────────────────────────────────────────────────────────── -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.10</version>
+        <relativePath/>
+    </parent>
+
+    <!-- ── Project identity ──────────────────────────────────────────────── -->
+    <groupId>com.currencyexchange</groupId>
+    <artifactId>currency-exchange</artifactId>
+    <version>1.0.0</version>
+    <name>currency-exchange</name>
+    <description>
+        Real-Time Currency Exchange Rate Tracker and Peak Analyser.
+        Fetches live rates, stores history, identifies peaks, exports to JSON,
+        and runs Python ML models for BUY/WAIT/HOLD recommendations.
+    </description>
+
+    <!-- ── Global properties ─────────────────────────────────────────────── -->
+    <properties>
+        <!-- Must match the installed JDK. Verified: Java 21.0.1 -->
+        <java.version>21</java.version>
+    </properties>
+
+    <!-- ── Dependencies ──────────────────────────────────────────────────── -->
+    <dependencies>
+
+        <!-- HTTP server + @RestController + @GetMapping etc. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Hibernate ORM + @Entity + @Repository + @Transactional -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- PostgreSQL JDBC driver (runtime only — not needed at compile time) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Enables @Valid, @NotBlank, @Size etc. on request parameters -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!--
+            Lombok: generates boilerplate at compile time.
+            @Data       → getters, setters, equals, hashCode, toString
+            @Builder    → fluent builder pattern
+            @Slf4j      → injects a logger field
+            @RequiredArgsConstructor → constructor for all final fields (used for DI)
+            Marked optional so it is stripped from the final JAR.
+        -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!--
+            Jackson: JSON serialisation/deserialisation engine.
+            jackson-databind is transitive from starter-web but declared
+            explicitly so the version in use is always visible here.
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!--
+            JavaTimeModule: teaches Jackson how to handle java.time types
+            (LocalDateTime, LocalDate etc.).
+            WITHOUT this: LocalDateTime serialises as a numeric array [2024,6,1,12,0,0].
+            WITH this:    LocalDateTime serialises as "2024-06-01T12:00:00".
+            NOT pulled in transitively — must be declared explicitly.
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <!--
+            spring-dotenv: automatically loads the .env file into Spring's
+            Environment at startup so ${VAR} placeholders in application.properties
+            resolve correctly without manual export commands.
+        -->
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>spring-dotenv</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
+        <!-- JUnit 5 + Mockito + AssertJ — test scope only, not shipped in JAR -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <!-- ── Build ─────────────────────────────────────────────────────────── -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Lombok is compile-only — exclude from the runnable JAR -->
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

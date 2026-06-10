@@ -1,0 +1,19 @@
+# ── SECRETS — never commit these ─────────────────────────────────────────────
+.env
+.env.*
+
+# ── Maven build output ────────────────────────────────────────────────────────
+target/
+
+# ── JSON exports (generated output data, not source) ──────────────────────────
+data/
+
+# ── IDE files ─────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/ 
+*.class
+
+# ── OS files ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
