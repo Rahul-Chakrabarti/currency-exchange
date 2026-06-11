@@ -2,6 +2,11 @@
 
 > **Real-time and historical canadian forward currency rate tracking, peak detection, and machine learning forecasting served through a clean self-hosted web interface.**
 
+
+*Quick Start Guide*
+You can run the application in three supported ways. Docker Compose is the simplest because it starts PostgreSQL and the application together. `start.bat` is a Windows convenience wrapper around Docker Compose. Maven is useful for local development, but it requires PostgreSQL, Java and Python dependencies to be available on your machine.
+For more details, please browse the system dependencies, tech stacks, and user guide.
+
 ---
 
 ## Table of Contents
@@ -16,7 +21,7 @@
 8. [Insights you can gain](#8-insights-you-can-gain)
 9. [Machine learning models](#9-machine-learning-models)
 10. [System dependencies](#10-system-dependencies)
-11. [User guide — non-technical (web app)](#11-user-guide--non-technical-web-app)
+11. [User guide](#11-user-guide)
 12. [User guide — technical (full setup)](#12-user-guide--technical-full-setup)
 13. [API reference](#13-api-reference)
 14. [Future roadmap](#14-future-roadmap)
@@ -447,6 +452,9 @@ The application calls `https://open.er-api.com/v6/latest/{base}` automatically. 
 
 This section is for anyone who wants to use the web interface without knowing anything about the Java, databases, or APIs.
 
+The recommended way to use and run this program is via Docker. Simply install Docker and the Dockerfile and Docker-compose will be detected and the program can run as intended.
+If all dependencies are already installed, the start.bat file included may be used. 
+
 ### What you need
 
 Once this project is setup and running (read below for some help or view the usage steps above), you only need a web browser.
@@ -510,9 +518,9 @@ Run the installer with all default settings. After installing, open Docker Deskt
 and wait until the whale icon in the system tray stops animating and says
 **Docker Desktop is running**.
 
-Docker handles everything else — Java, Maven, PostgreSQL, Python, and all
+Docker handles everything else: Java, Maven, PostgreSQL, Python, and all
 dependencies are downloaded and run inside containers automatically. You do
-not install any of them on your machine.
+not need install any of them on your machine. However, if you wish to run this program with Docker, the dependencies may be installed.
 
 ---
 
@@ -633,7 +641,7 @@ mkdir ml
 
 ### Running the project — three options
 
-You can run the application in three supported ways. Docker Compose is the simplest because it starts PostgreSQL and the application together. `start.bat` is a Windows convenience wrapper around Docker Compose. Maven is useful for local development, but it requires PostgreSQL and Python dependencies to be available on your machine.
+You can run the application in three supported ways. Docker Compose is the simplest because it starts PostgreSQL and the application together. `start.bat` is a Windows convenience wrapper around Docker Compose. Maven is useful for local development, but it requires PostgreSQL, Java and Python dependencies to be available on your machine.
 
 #### Option 1: Docker Compose
 
@@ -919,7 +927,7 @@ The current application is a solid foundation. The following additions would com
 
 The project as it stands in this base form is structured for simplicity and proof of concept, the following are other interesting boosts to the project I have come across in my research but have not implemented as of yet.
 
-### Phase 1 — Complete the ML layer (next priority)
+### Phase 1: Complete the ML layer
 
 - **XGBoost** [35] — replace Random Forest as the primary classification model
 - **Prophet** [36] — add automatic seasonality detection
@@ -927,7 +935,7 @@ The project as it stands in this base form is structured for simplicity and proo
 - **Monte Carlo (GBM)** [43, 44] — simulate 10,000 possible rate paths over 7 days; add cone chart to web interface
 - **LSTM** [20] — add as a long-range pattern detector once 2+ years of data have accumulated
 
-### Phase 2 — Web interface improvements
+### Phase 2: Web interface improvements
 
 - Rate alert system (browser notification when rate crosses a threshold)
 - Monte Carlo cone chart replacing the bar chart
@@ -935,7 +943,7 @@ The project as it stands in this base form is structured for simplicity and proo
 - Historical line chart with zoom controls
 - CSV data export
 
-### Phase 3 — Production features
+### Phase 3: Production features
 
 - Bid/ask spread via paid API upgrade
 - Transfer service comparison (Wise, PayPal, bank rates)
@@ -1107,6 +1115,7 @@ Add the model to `ml/forecast.py` following the existing pattern:
 ## Project information
 
 This code was written, run and tested using Windows 11 and the following technology stack:
+
 **Stack:** Java 21 · Spring Boot 3.3.10 · PostgreSQL 16 · Python 3.10+ · Maven 3.9 · Docker
 
 **External API:** [open.er-api.com](https://open.er-api.com) — free, no account required
