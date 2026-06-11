@@ -3,7 +3,8 @@
 > **Real-time and historical canadian forward currency rate tracking, peak detection, and machine learning forecasting served through a clean self-hosted web interface.**
 
 
-*Quick Start Guide*
+**Quick Start Guide**
+
 You can run the application in three supported ways. Docker Compose is the simplest because it starts PostgreSQL and the application together. `start.bat` is a Windows convenience wrapper around Docker Compose. Maven is useful for local development, but it requires PostgreSQL, Java and Python dependencies to be available on your machine.
 For more details, please browse the system dependencies, tech stacks, and user guide.
 
